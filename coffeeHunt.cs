@@ -313,7 +313,6 @@ public class SpriteHUDLCD
 	}
 }
 
-
 bool matchSpeed = false;
 
 DetectedEntity matchTarget = null;
@@ -2992,84 +2991,6 @@ static void filterchk()
 	}
 }
 
-bool ejecting = true;
-
-public void grinder_update()
-{
-	grinderInterface.updateInterval = 30;
-	grinderInterface.update();
-
-	//gProgram.Echo(gProgram.grinders.Count + ":" + gProgram.connectors.Count);
-	if (tick % 60 == 0)
-	{
-
-		if (grinders.Count > 0 && connectors.Count > 0)
-		{
-			if (!gsetup)
-			{
-				gsetup = true;
-				foreach (var g in grinders)
-				{
-					g.UseConveyorSystem = !Config.Eject.Val;
-				}
-			}
-			if (Config.Eject.Val)
-			{
-				var grinders_on = grinders.Count > 0 ? grinders[0].Enabled : false;
-
-				if (grinders_on)
-				{
-					filterchk();
-					foreach (var kvp in grinderInterface.items)
-					{
-						var i = kvp.Key.GetItemInfo();
-						/*
-						 if ammo or ingot or ore or tool, keep.
-						otherwise, if in vanilla comp list, trash
-						unless it has wildcards in it, then keep anyway.
-						 */
-						bool keep = i.IsAmmo || i.IsIngot || i.IsOre || i.IsTool;
-						if (!keep) keep = !discard_components.Contains(kvp.Key.SubtypeId);
-						if (!keep)
-						{
-							foreach (var f in keepfilters)
-							{
-								if (kvp.Key.SubtypeId.IndexOf(f) != -1)
-								{
-									keep = true;
-									break;
-								}
-							}
-						}
-						if (keep) grinderInterface.TransferItemTo(kvp.Key, kvp.Value, lootInterface);
-						else grinderInterface.TransferItemTo(kvp.Key, kvp.Value, connectorInterface);
-					}
-				}
-				connectorInterface.update(grinders_on);
-				bool shouldEject = connectorInterface.items.Count > 0;
-				if (shouldEject)
-				{
-					foreach (var c in connectors)
-					{
-						if (c.IsConnected)
-						{
-							shouldEject = false;
-							break;
-						}
-					}
-				}
-				if (shouldEject != ejecting)
-				{
-					ejecting = shouldEject;
-					foreach (var c in connectors)
-					{
-						c.ThrowOut = ejecting;
-					}
-				}
-			}
-		}
-	}
-}
 
 public class Config_
 {
